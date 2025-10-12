@@ -4,6 +4,7 @@ const logger = require('./utils/logger')
 const morgan = require('morgan')
 const mongoose = require('mongoose')
 const cors = require('cors')
+const path = require('path')
 
 const blogsRoutes = require('./controllers/blogs')
 const usersRoutes = require('./controllers/users')
@@ -23,6 +24,11 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :requestBody'))
+
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, 'client', 'dist')))
+}
+
 
 app.use(middlewares.tokenExtractor)
 app.use(loginRouter)
