@@ -16,7 +16,8 @@ blogsRoutes.post(baseURL, userExtractor, async (req, res) => {
     const blogToCreate = req.body
     blogToCreate.user = candidateUser._id
     const blog = new Blog(blogToCreate)
-    const result = await (await blog.save()).populate('user')
+    await blog.save()
+    const result = await blog.populate('user')
 
     candidateUser.blogs = [
         ...candidateUser.blogs,

@@ -105,7 +105,7 @@ describe('Blogs test suite.', () => {
             const nBlogsAfter = response.body.length
 
             assert.equal(nBlogsBefore + 1, nBlogsAfter)
-            assert.deepStrictEqual({ ...initialData.dummyBlog, id: createdBlog.id, user: userWhoHasCreatedSomeBlogs.id }, createdBlog)
+            assert.deepStrictEqual({ ...initialData.dummyBlog, id: createdBlog.id, user: createdBlog.user }, createdBlog)
         }),
 
         test('POST request fails if token not provided.', async () => {
