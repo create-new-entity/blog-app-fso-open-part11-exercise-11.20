@@ -11,12 +11,14 @@
     "lint": "eslint .",
     "server:full": "npm run lint && npm run test",
 
+    "install:client": "npm install --prefix client",
     "test:client": "npm run test --prefix client",
     "lint:client": "npm run lint --prefix client",
     "build:client":"npm run build --prefix client",
     "build:client:full": "npm run lint:client && npm run test:client && npm run build:client",
 
-    "start:prod": "npm run build:client:full && npm run start"
+    "start:prod": "npm run build:client:full && npm run start",
+    "install:full": "npm install && npm run install:client"
   },
   "keywords": [],
   "author": "",
