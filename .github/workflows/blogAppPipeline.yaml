@@ -23,6 +23,9 @@ jobs:
     needs: compute_skip_job
     runs-on: ubuntu-latest
     env:
+        PORT: ${{ secrets.PORT }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
         TEST_MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
     steps:
       - uses: actions/checkout@v4
