@@ -4,9 +4,9 @@ name: Blog App Pipeline
 on:
   push:
     branches:
-      - main
+      - development
   pull_request:
-    branches: [main]
+    branches: [development]
     types: [opened, synchronize]
 
 jobs:
@@ -39,7 +39,7 @@ jobs:
         id: build_step
         continue-on-error: true
         run: npm run build:client
-        
+
       - name: Build Failed. Notify on Discord.
         if: ${{ steps.build_step.outcome == 'failure' }}
         uses: sarisia/actions-status-discord@v1
@@ -73,7 +73,7 @@ jobs:
             timestamp: ${{ github.event.commits[0].timestamp }}
           color: '#2C941C'
   tag_release:
-    if: ${{ github.ref_name == 'main' && needs.compute_skip_job.outputs.SHOULD_SKIP == 'false' }}
+    if: ${{ github.ref_name == 'development' && needs.compute_skip_job.outputs.SHOULD_SKIP == 'false' }}
     needs: [compute_skip_job, blog_app_deployment_pipeline]
     runs-on: ubuntu-latest
     steps:
