@@ -1,0 +1,86 @@
+
+name: Blog App Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
+
+jobs:
+  compute_skip_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compute skip
+        id: compute_skip
+        run: echo "skip=${{ contains(join(github.event.commits.*.message, ' '), '#skip') }}" >> $GITHUB_OUTPUT
+    outputs:
+      SHOULD_SKIP: ${{ steps.compute_skip.outputs.skip }}
+
+  blog_app_deployment_pipeline:
+    needs: compute_skip_job
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies 
+        run: npm run install:full
+
+      - name: lint and test server
+        run: npm run server:full
+      - name: lint and test client
+        run: npm run lint:client && npm run test:client
+
+      - name: build client
+        id: build_step
+        continue-on-error: true
+        run: npm run build:client
+        
+      - name: Build Failed. Notify on Discord.
+        if: ${{ steps.build_step.outcome == 'failure' }}
+        uses: sarisia/actions-status-discord@v1
+        with:
+          status: Failure
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          avatar_url: https://www.pngmart.com/files/22/Sad-Cat-Meme-Download-PNG-Image.png
+          title: 'Build failed. Please fix ASAP.'
+          description: |
+            ref: ${{ github.ref }}
+            afterCommit: ${{ github.event.after }}
+            beforeCommit: ${{ github.event.before }}
+            timestamp: ${{ github.event.commits[0].timestamp }}
+          color: '#FF0000'
+      
+      - name: Trigger deployment on Render
+        if: ${{ github.event_name == 'push' && needs.compute_skip_job.outputs.SHOULD_SKIP == 'false' }}
+        run: curl https://api.render.com/deploy/srv-${{secrets.RENDER_SERVICE_ID}}?key=${{secrets.RENDER_API_KEY}}
+      - name: Deployment Successful
+        if: ${{ success() && github.event_name == 'push' && needs.compute_skip_job.outputs.SHOULD_SKIP == 'false' }}
+        uses: sarisia/actions-status-discord@v1
+        with:
+          status: Success
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          avatar_url: https://static.vecteezy.com/system/resources/thumbnails/044/876/360/small_2x/cat-with-glasses-meme-sticker-tshirt-illustration-free-png.png
+          title: 'New version released! Success!'
+          description: |
+            ref: ${{ github.ref }}
+            afterCommit: ${{ github.event.after }}
+            beforeCommit: ${{ github.event.before }}
+            timestamp: ${{ github.event.commits[0].timestamp }}
+          color: '#2C941C'
+  tag_release:
+    if: ${{ github.ref_name == 'main' && needs.compute_skip_job.outputs.SHOULD_SKIP == 'false' }}
+    needs: [compute_skip_job, blog_app_deployment_pipeline]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1.75.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: patch

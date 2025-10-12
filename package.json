@@ -15,10 +15,11 @@
     "test": "cross-env  NODE_ENV=test node --test --test-concurrency=1",
     "start:test": "cross-env NODE_ENV=test node --watch index.js",
     "lint": "eslint .",
-    
+
+    "install:full": "npm install && npm run install:client",
+    "install:build:full": "npm run install:full && npm run build:client:full",
     "server:full": "npm run lint && npm run test",
-    "start:prod": "npm run build:client:full && npm run start",
-    "install:full": "npm install && npm run install:client"
+    "start:prod": "npm run start"
   },
   "keywords": [],
   "author": "",
