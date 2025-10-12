@@ -22,6 +22,8 @@ jobs:
   blog_app_deployment_pipeline:
     needs: compute_skip_job
     runs-on: ubuntu-latest
+    env:
+        TEST_MONGODB_URI: ${{ secrets.MONGODB_URI }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,10 +33,7 @@ jobs:
         run: npm run install:full
 
       - name: lint and test server
-        env:
-          TEST_MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
-        run: |
-          echo "MongoDB URI starts with: ${MONGODB_URI:0:10}..."
+        run: npm run server:full
       - name: lint and test client
         run: npm run lint:client && npm run test:client
 
