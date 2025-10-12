@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const server = 'http://localhost:3003'
+const server = ''
 const blogsBaseUrl = '/api/blogs'
 const loginBaseUrl = '/api/login'
 
