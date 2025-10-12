@@ -31,6 +31,8 @@ jobs:
         run: npm run install:full
 
       - name: lint and test server
+        env:
+          TEST_MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
         run: npm run server:full
       - name: lint and test client
         run: npm run lint:client && npm run test:client
